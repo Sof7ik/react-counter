@@ -3,51 +3,64 @@ import PropTypes from 'prop-types';
 
 import styles from './style.module.css';
 
-const Counter = ({min, max}) =>
+Counter.propTypes = {
+    min: PropTypes.number.isRequired,
+    max: PropTypes.number.isRequired
+}
+
+function Counter ({min, max})
 {
     const [counter, setCounter] = useState(1);
     const [errorMessage, setErrorMessage] = useState('');
 
-    function increment ()
+    function validator (newValue)
     {
-        if (counter + 1 <= max)
+        if (newValue <= max && newValue >= min)
         {
-            setCounter(counter + 1);
-            setErrorMessage('');
+            return newValue;
         }
-        else
+        else if (newValue > max)
         {
             setErrorMessage('Число большое очень');
+            return -1;
         }
+        else if (newValue < min)
+        {
+            setErrorMessage('Число маленькое очень');
+            return -1;
+        }
+    }
+
+    function increment ()
+    {
+        const newCounter = validator(counter + 1);
+        if (newCounter !== -1)
+        {
+            setCounter(newCounter);
+            setErrorMessage('');
+        }
+
     }
 
     function decrement ()
     {
-        if (counter - 1 >= min)
+        const newCounter = validator(counter - 1);
+        if (newCounter !== -1)
         {
-            setCounter(counter - 1);
+            setCounter(newCounter);
             setErrorMessage('');
-        }
-        else
-        {
-            setErrorMessage('Число маленькое очень');
         }
     }
 
-    function counterHandler (e)
+    function counterHandler (newValue)
     {
-        const newValue = parseInt(e.target.value);
-
         if (!(isNaN(newValue)))
         {
-            if (newValue >= min && newValue <= max){
-                setCounter(newValue);
-                setErrorMessage('');
-            }
-            else
+            const newCounter = validator(newValue);
+            if (newCounter !== -1)
             {
-                if (newValue > max) setErrorMessage('Число большое очень');
-                if (newValue < min) setErrorMessage('Число маленькое очень')
+                setCounter(newCounter);
+                setErrorMessage('');
             }
         }
         else
@@ -60,17 +73,21 @@ const Counter = ({min, max}) =>
         <div className={styles.wrapper}>
             <div className={styles.counterWrapper}>
                 <button onClick={increment}>+ (прибавить к счетчику)</button>
-                    <input type={"text"} className={styles.inputCounter} value={counter} readOnly={false} onChange={counterHandler}/>
+                    <input
+                        type={"text"}
+                        className={styles.inputCounter}
+                        value={counter}
+                        onChange={e =>
+                                    {
+                                        counterHandler(parseInt(e.target.value))
+                                    }
+                        }/>
                 <button onClick={decrement}>- (убавить счетчик)</button>
             </div>
 
             <p className={styles.error}>{errorMessage}</p>
         </div>
     );
-}
-
-PropTypes.Counter = () => {
-
 }
 
 export default Counter;
